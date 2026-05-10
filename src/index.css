@@ -1,0 +1,43 @@
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500;600;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { font-family: 'DM Sans', sans-serif; background: #fafafa; color: #1a1a1a; margin: 0; }
+
+@layer utilities {
+  .font-display { font-family: 'Baloo 2', cursive; }
+  .gradient-brand { background: linear-gradient(135deg, #f97316 0%, #f43f5e 100%); }
+  .gradient-mint { background: linear-gradient(135deg, #10b981 0%, #38bdf8 100%); }
+  .gradient-lemon { background: linear-gradient(135deg, #facc15 0%, #fb923c 100%); }
+  .gradient-purple { background: linear-gradient(135deg, #a855f7 0%, #f43f5e 100%); }
+  .gradient-hero { background: linear-gradient(135deg, #fff7ed 0%, #fef3c7 30%, #fce7f3 70%, #ede9fe 100%); }
+  .text-gradient { background: linear-gradient(135deg, #f97316, #f43f5e); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .text-gradient-purple { background: linear-gradient(135deg, #a855f7, #f43f5e); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .card-hover { transition: transform 0.25s ease, box-shadow 0.25s ease; }
+  .card-hover:hover { transform: translateY(-6px); box-shadow: 0 24px 48px -8px rgba(249,115,22,0.22); }
+  .float-1 { animation: float1 4s ease-in-out infinite; }
+  .float-2 { animation: float2 5s ease-in-out infinite; }
+  .float-3 { animation: float3 3.5s ease-in-out infinite; }
+  .blob { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+  .blob-2 { border-radius: 40% 60% 70% 30% / 40% 70% 30% 60%; }
+}
+
+@keyframes float1 {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-18px) rotate(3deg); }
+}
+@keyframes float2 {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-12px) rotate(-2deg); }
+}
+@keyframes float3 {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #f1f1f1; }
+::-webkit-scrollbar-thumb { background: #f97316; border-radius: 10px; }
