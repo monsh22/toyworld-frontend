@@ -3,24 +3,32 @@ import { useCartStore } from "../store/cartStore";
 import { useNavigate } from "react-router-dom";
 import api from "../api/axios";
 import { useAuthStore } from "../store/authStore";
+import FakePayment from "../components/FakePayment";
 
 export default function CartPage() {
   const { items, remove, clear, total } = useCartStore();
   const { token } = useAuthStore();
   const navigate = useNavigate();
-  const [form, setForm] = useState({ address:"", city:"", state:"", zip_code:"" });
-  const [msg, setMsg]   = useState("");
-  const [success, setSuccess] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [form, setForm]           = useState({ address:"", city:"", state:"", zip_code:"" });
+  const [msg, setMsg]             = useState("");
+  const [success, setSuccess]     = useState(false);
+  const [loading, setLoading]     = useState(false);
+  const [showPayment, setShowPayment] = useState(false);
 
-  const checkout = async () => {
+  const handleCheckout = () => {
     if (!token) { navigate("/login"); return; }
     if (!form.address || !form.city) { setMsg("Por favor llena todos los campos de envío"); return; }
+    setMsg("");
+    setShowPayment(true);
+  };
+
+  const handlePaymentSuccess = async () => {
+    setShowPayment(false);
     setLoading(true);
     try {
       await api.post("/orders/", { items: items.map(i => ({ product_id:i.id, quantity:i.quantity })), ...form });
       clear(); setSuccess(true);
-    } catch { setMsg("Error al procesar el pedido. Intenta de nuevo."); }
+    } catch { setMsg("Error al procesar el pedido."); }
     finally { setLoading(false); }
   };
 
@@ -28,27 +36,19 @@ export default function CartPage() {
     <div className="min-h-screen flex items-center justify-center px-4 pt-16 relative overflow-hidden"
       style={{background:"linear-gradient(135deg,#ecfdf5 0%,#d1fae5 30%,#fce7f3 70%,#ede9fe 100%)"}}>
       <div className="fixed top-20 right-10 w-72 h-72 bg-mint-200 rounded-full blur-3xl opacity-20 pointer-events-none" />
-      <div className="fixed bottom-20 left-10 w-64 h-64 bg-purple-200 rounded-full blur-3xl opacity-20 pointer-events-none" />
-
       <div className="relative bg-white/90 backdrop-blur rounded-4xl p-12 shadow-hover border border-white text-center max-w-lg w-full z-10">
-        {/* Confetti emojis */}
         <div className="absolute top-6 left-8 text-3xl float-1 select-none">🎊</div>
         <div className="absolute top-6 right-8 text-3xl float-2 select-none">🎉</div>
-        <div className="absolute bottom-6 left-10 text-2xl float-3 select-none">⭐</div>
-        <div className="absolute bottom-6 right-10 text-2xl float-1 select-none">🌟</div>
-
         <div className="text-8xl mb-5 float-1">🎉</div>
         <h2 className="font-display font-800 text-4xl text-gray-900 mb-3">¡Pedido realizado!</h2>
         <p className="text-gray-500 text-lg mb-2">Tu pedido está siendo procesado.</p>
         <p className="text-gray-400 mb-8">Te notificaremos sobre el estado de tu envío. 📦</p>
-
-        {/* Timeline mini */}
         <div className="bg-gray-50 rounded-2xl p-5 mb-8 border border-gray-100">
           <p className="text-xs font-600 text-gray-500 uppercase tracking-wider mb-4">¿Qué sigue?</p>
           <div className="space-y-3">
             {[
               { icon:"✅", text:"Pedido recibido", done:true },
-              { icon:"💳", text:"Verificando pago", done:false },
+              { icon:"💳", text:"Pago confirmado", done:true },
               { icon:"📦", text:"Preparando paquete", done:false },
               { icon:"🚚", text:"Enviando a tu puerta", done:false },
               { icon:"🎉", text:"¡Entrega en 3-5 días!", done:false },
@@ -61,7 +61,6 @@ export default function CartPage() {
             ))}
           </div>
         </div>
-
         <div className="flex gap-3 justify-center">
           <button onClick={() => navigate("/orders")}
             className="gradient-brand text-white font-700 px-8 py-3.5 rounded-2xl shadow-toy hover:shadow-hover transition hover:-translate-y-0.5">
@@ -82,11 +81,17 @@ export default function CartPage() {
       <div className="fixed top-20 right-10 w-64 h-64 bg-brand-200 rounded-full blur-3xl opacity-20 pointer-events-none" />
       <div className="fixed bottom-20 left-10 w-56 h-56 bg-purple-200 rounded-full blur-3xl opacity-20 pointer-events-none" />
 
+      {showPayment && (
+        <FakePayment
+          total={total()}
+          onSuccess={handlePaymentSuccess}
+          onCancel={() => setShowPayment(false)}
+        />
+      )}
+
       <div className="max-w-5xl mx-auto px-6 relative">
         <div className="mt-6 mb-8">
-          <div className="inline-flex items-center gap-2 bg-white/80 text-brand-600 px-4 py-1.5 rounded-full text-sm font-600 mb-3 shadow-sm">
-            🛒 Tu selección
-          </div>
+          <div className="inline-flex items-center gap-2 bg-white/80 text-brand-600 px-4 py-1.5 rounded-full text-sm font-600 mb-3 shadow-sm">🛒 Tu selección</div>
           <h1 className="font-display font-800 text-5xl text-gray-900">Tu <span className="text-gradient">Carrito</span> 🛒</h1>
         </div>
 
@@ -102,7 +107,6 @@ export default function CartPage() {
           </div>
         ) : (
           <div className="grid lg:grid-cols-5 gap-6">
-            {/* Items */}
             <div className="lg:col-span-3 space-y-3">
               <p className="font-display font-700 text-gray-900 mb-2">{items.length} producto{items.length!==1?"s":""} en tu carrito</p>
               {items.map(i => (
@@ -123,7 +127,6 @@ export default function CartPage() {
               ))}
             </div>
 
-            {/* Checkout */}
             <div className="lg:col-span-2">
               <div className="bg-white/90 backdrop-blur rounded-3xl p-6 shadow-hover border-2 border-white sticky top-24">
                 <h2 className="font-display font-700 text-xl text-gray-900 mb-1">Datos de Envío 📦</h2>
@@ -146,9 +149,10 @@ export default function CartPage() {
                     <span className="text-gray-500 font-500">Total a pagar</span>
                     <span className="font-display font-800 text-3xl text-brand-500">${total().toFixed(2)}</span>
                   </div>
-                  <button onClick={checkout} disabled={loading}
-                    className="w-full gradient-brand text-white font-700 py-4 rounded-2xl shadow-toy hover:shadow-hover transition-all hover:-translate-y-0.5 text-base disabled:opacity-60">
-                    {loading ? "Procesando..." : "Confirmar Pedido ✓"}
+                  <button onClick={handleCheckout} disabled={loading}
+                    className="w-full gradient-brand text-white font-700 py-4 rounded-2xl shadow-toy hover:shadow-hover transition-all hover:-translate-y-0.5 text-base disabled:opacity-60 flex items-center justify-center gap-2">
+                    <span>💳</span>
+                    {loading ? "Procesando..." : "Proceder al pago"}
                   </button>
                   <p className="text-xs text-gray-400 text-center mt-3">🔒 Pago seguro y encriptado</p>
                 </div>
